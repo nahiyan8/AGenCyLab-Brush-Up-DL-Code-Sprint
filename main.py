@@ -1,9 +1,9 @@
 # # PyTorch Lightning CIFAR10 ~94% Baseline Tutorial
-# 
+#
 # * **Author:** PL team
 # * **License:** CC BY-SA
 # * **Generated:** 2022-04-28T08:05:29.967173
-# 
+#
 # Train a Resnet to 94% accuracy on Cifar10!
 
 import pandas as pd
@@ -17,6 +17,7 @@ from pytorch_lightning.loggers import CSVLogger
 from data import cifar10_dm
 from configs import cfg
 from models import LitResnet, SWAResnet
+
 
 def main():
     seed_everything(cfg.RANDOM_SEED)
@@ -32,7 +33,10 @@ def main():
         accelerator="auto",
         devices=cfg.NUM_DEVICES,  # limiting got iPython runs
         logger=CSVLogger(save_dir=cfg.PATH_LOGS),
-        callbacks=[LearningRateMonitor(logging_interval="step"), TQDMProgressBar(refresh_rate=10)],
+        callbacks=[
+            LearningRateMonitor(logging_interval="step"),
+            TQDMProgressBar(refresh_rate=10),
+        ],
     )
 
     trainer.fit(model, cifar10_dm)
@@ -66,5 +70,6 @@ def main():
     display(metrics.dropna(axis=1, how="all").head())
     sn.relplot(data=metrics, kind="line")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

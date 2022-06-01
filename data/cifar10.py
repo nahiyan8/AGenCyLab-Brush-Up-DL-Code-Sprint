@@ -10,7 +10,7 @@ from configs import cfg
 ssl._create_default_https_context = ssl._create_unverified_context
 
 # ### CIFAR10 Data Module
-# 
+#
 # Import the existing data module from `bolts` and modify the train and test transforms.
 
 train_transforms = torchvision.transforms.Compose(

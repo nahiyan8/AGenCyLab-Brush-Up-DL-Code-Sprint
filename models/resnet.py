@@ -9,9 +9,12 @@ from pytorch_lightning import LightningModule
 
 from configs import cfg
 
+
 # ### Resnet
-# Modify the pre-existing Resnet architecture from TorchVision. The pre-existing architecture is based on ImageNet
-# images (224x224) as input. So we need to modify it for CIFAR10 images (32x32).
+# Modify the pre-existing Resnet architecture from TorchVision.
+# The pre-existing architecture is based on ImageNet images (224x224) as input.
+# So we need to modify it for CIFAR10 images (32x32).
+
 
 def create_model():
     model = torchvision.models.resnet18(pretrained=False, num_classes=10)
@@ -19,11 +22,13 @@ def create_model():
     model.maxpool = nn.Identity()
     return model
 
+
 # ### Lightning Module
 # Check out the [`configure_optimizers`](https://pytorch-lightning.readthedocs.io/en/stable/common/lightning_module.html#configure-optimizers)
 # method to use custom Learning Rate schedulers. The OneCycleLR with SGD will get you to around 92-93% accuracy
 # in 20-30 epochs and 93-94% accuracy in 40-50 epochs. Feel free to experiment with different
 # LR schedules from https://pytorch.org/docs/stable/optim.html#how-to-adjust-learning-rate
+
 
 class LitResnet(LightningModule):
     def __init__(self, lr=0.05):
@@ -79,11 +84,13 @@ class LitResnet(LightningModule):
         }
         return {"optimizer": optimizer, "lr_scheduler": scheduler_dict}
 
+
 # ### Bonus: Use [Stochastic Weight Averaging](https://arxiv.org/abs/1803.05407) to get a boost on performance
-# 
+#
 # Use SWA from torch.optim to get a quick performance boost. Also shows a couple of cool features from Lightning:
 # - Use `training_epoch_end` to run code after the end of every epoch
 # - Use a pretrained model directly with this wrapper for SWA
+
 
 class SWAResnet(LitResnet):
     def __init__(self, trained_model, lr=0.01):
@@ -111,8 +118,14 @@ class SWAResnet(LitResnet):
         self.log("val_acc", acc, prog_bar=True)
 
     def configure_optimizers(self):
-        optimizer = torch.optim.SGD(self.model.parameters(), lr=self.hparams.lr, momentum=0.9, weight_decay=5e-4)
+        optimizer = torch.optim.SGD(
+            self.model.parameters(), lr=self.hparams.lr, momentum=0.9, weight_decay=5e-4
+        )
         return optimizer
 
     def on_train_end(self):
-        update_bn(self.trainer.datamodule.train_dataloader(), self.swa_model, device=self.device)
+        update_bn(
+            self.trainer.datamodule.train_dataloader(),
+            self.swa_model,
+            device=self.device,
+        )
